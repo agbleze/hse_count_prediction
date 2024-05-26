@@ -2,3 +2,5 @@
 
 # How to run code
 To run the code, first install the packages in the requirements.txt
+
+# How to contribute
