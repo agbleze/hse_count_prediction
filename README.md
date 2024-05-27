@@ -4,3 +4,4 @@
 To run the code, first install the packages in the requirements.txt
 
 # How to contribute
+to contribute run 
