@@ -8,4 +8,6 @@ to contribute run
 
 Method
 1. Run object detection
-2. 2. count predictions
+2. Group predictions based on class
+3. 2. count predictions
+
