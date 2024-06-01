@@ -13,3 +13,4 @@ Method
 
 
 # How to run code
+1. clone the repo
