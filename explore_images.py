@@ -2,12 +2,23 @@
 #%%
 import pandas as pd
 import numpy as np
+import rasterio
 
 #%%
 train_df = pd.read_csv("/home/lin/codebase/hse_count_prediction/zindi_hse_no_pred/Train.csv")
 
 # %%
 train_df.category_id.value_counts()
+
+#%%
+train_df.info()
+
+#%%
+train_df.describe()
+
+#%%
+
+train_df.head()
 # %%
 #1 added visz for tif
 #2 
