@@ -160,3 +160,5 @@ cython_debug/
 #.idea/
 
 zindi_hse_no_pred/*
+visualize_bbox/*
+*tif
