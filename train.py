@@ -76,14 +76,14 @@ def get_model(num_classes, backbone,
         model.roi_heads.box_predictor = FastRCNNPredictor(in_channels=in_features, 
                                                         num_classes=num_classes
                                                         )
-    return model#.to(device)
+    return model.to(device)
 
 def train_batch(inputs, model, optimizer):
-    model.to("cpu").train()
+    model.to(device).train()
     input, targets = inputs
     #print(f"targets: {targets}")
-    input = list(image.to("cpu") for image in input)
-    targets = [{k: v.to("cpu") for k, v in t.items()} for t in targets]
+    input = list(image.to(device) for image in input)
+    targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
     #print(f"targets. {targets}")
     optimizer.zero_grad()
     losses = model(input, targets)

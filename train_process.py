@@ -37,10 +37,10 @@ all_img_dir = "/home/lin/codebase/hse_count_prediction/zindi_hse_no_pred/Images/
 
 #trn, val = trn.dropna(), val.dropna()
 trn_data = HseDataset(df=trn, img_dir=all_img_dir, only_bbox=True,
-                    resize=(224,224), return_image_path=False
+                    resize=None, return_image_path=False
                     )        
 val_data = HseDataset(df=val, img_dir=all_img_dir, only_bbox=True,
-                             resize=(224,224), return_image_path=False
+                             resize=None, return_image_path=False
                              )
 batch_size = 10
 trn_dataloader = DataLoader(dataset=trn_data, batch_size=batch_size, 
@@ -58,13 +58,13 @@ val_dataloader = DataLoader(dataset=val_data, batch_size=batch_size,
 model_name = "fasterrcnn_resnet50_fpn_v2"
 num_classes = trn["category_id"].nunique() + 1
 #ssdkwargs = {"detections_per_img":1}
-model = get_model(num_classes=2, backbone=model_name,
+model = get_model(num_classes=num_classes, backbone=model_name,
                   trainable_backbone_layers=3,
                   )
 optimizer = torch.optim.SGD(params=model.parameters(), lr=0.0005,
                             momentum=0.9, weight_decay=0.0005
                             )
-n_epochs = 100
+n_epochs = 300
 log = Report(n_epochs)
 
 #%%
@@ -87,7 +87,7 @@ log = Report(n_epochs)
 #                )
 
 # %%
-model_dir = "/home/lin/codebase/spacecraft_detection/model_store"
+model_dir = "/home/lin/codebase/hse_count_prediction/model_store"
 optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4, weight_decay=1e-5)
 
 #%%

@@ -52,13 +52,13 @@ class HseDataset(torch.utils.data.Dataset):
         
         #if self.only_bbox:
             #self.label2target = {l:t+1 for t,l in enumerate(self.df["image_id"].unique())}
-        self.label2target = {"background": 0, "Other": 1.0, "Tin": 2.0, "Thatch": 3.0}
+        self.label2target = {"Other": 0, "Tin": 1, "Thatch": 2}
         #else:
             #self.label2target = {"background": 0, "Other": 1.0, "Tin": 2.0, "Thatch": 3.0}
             #self.label2target = {l:t+1 for t,l in enumerate(self.df["image_id"].unique())}
         #self.label2target["background"] = 0
         self.target2label = {t:l for l,t in self.label2target.items()}
-        self.background_class = self.label2target["background"]
+        #self.background_class = self.label2target["background"]
             
         
     def __getitem__(self, index):
@@ -79,7 +79,12 @@ class HseDataset(torch.utils.data.Dataset):
                 xmin,ymin, w, h = bb
                 xmax = xmin + w
                 ymax = ymin + h
-                bbox.append([xmin, ymin, xmax, ymax])
+                if (xmin == xmax) or (ymin == ymax):
+                    print(f"found issue with {img_file_path}")
+                    print(f"bbox: {xmin, ymin, xmax, ymax}")
+                    pass
+                else:
+                    bbox.append([xmin, ymin, xmax, ymax])
                 #category_id = df_ind.category_id
             else:
                 bbox = None
@@ -89,7 +94,7 @@ class HseDataset(torch.utils.data.Dataset):
         img = cv2.imread(img_file_path)
         self.orig_height, self.orig_width = img.shape[0], img.shape[1]
         if self.resize:
-            print(f"RUNNING RESIZING: {self.resize}")
+            #print(f"RUNNING RESIZING: {self.resize}")
             # img_bbox = (img_df["xmin"].values[0], img_df["ymin"].values[0],
             #             img_df["xmax"].values[0], img_df["ymax"].values[0]
             #             )
@@ -113,25 +118,31 @@ class HseDataset(torch.utils.data.Dataset):
             for bbx in img_bbox:
                 bbx[[0,2]] *= ratio_width
                 bbx[[1,3]] *= ratio_height
-                _img_bbox.append(bbx)
-            img_bbox = _img_bbox
+                _img_bbox.append([np.uint32(b) for b in bbx])
+            img_bbox = _img_bbox #np.int32(_img_bbox)
+            
+            for be in img_bbox:
+                if be == [710.7142944335938, 582.142822265625, 714.2857055664062, 582.142822265625]:
+                    print(f"found in {img_file_path}")
+                    print(be)
+                    exit()
             #print(f"img_bbox: {img_bbox}")
         #print(f"img: {img}")    
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         img = np.array(img)/255
         target = {}
         #img_bbox_uint32 = img_bbox.astype(np.uint32).tolist()
-        img_bbox_uint32 = [bbx.astype(np.uint32) for bbx in img_bbox]
+        #img_bbox_uint32 = [bbx.astype(np.uint32) for bbx in img_bbox]
         #img_bbox_uint32 = [torch.Tensor(img_bb_unit32).float().unsqueeze(0) for img_bb_unit32 in img_bbox_uint32]
         #print(f"img_bbox_uint32: {img_bbox_uint32}")
         
         if self.only_bbox:
             #img_label = img_df["category_id"].values.tolist()
-            target["boxes"] = torch.Tensor(img_bbox).float().squeeze(0) #img_bbox_uint32]) # torch.Tensor(img_bbox_uint32).float().unsqueeze(0)
+            target["boxes"] = torch.Tensor(img_bbox).float()#.squeeze(0) #img_bbox_uint32]) # torch.Tensor(img_bbox_uint32).float().unsqueeze(0)
             #target["labels"] = torch.Tensor([self.label2target[i] for i in img_label]).long()
-            target["labels"] = torch.Tensor(img_label).long().squeeze(0)
-            print(f"target['boxes']: {target['boxes']}")
-            print(f"target['labels']: {target['labels']}")
+            target["labels"] = torch.Tensor(img_label).long()#.squeeze(0)
+            #print(f"target['boxes']: {target['boxes']}")
+            #print(f"target['labels']: {target['labels']}")
         else:
             target["boxes"] = torch.Tensor([torch.Tensor(img_bbox).float().unsqueeze(0) for bbx_uint32 in img_bbox_uint32]) #img_bbox_uint32]) #torch.Tensor(img_bbox_uint32).float().unsqueeze(0)
             #img_label = img_df["category_id"].values.tolist()
